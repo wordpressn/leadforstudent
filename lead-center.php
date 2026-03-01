@@ -17,7 +17,6 @@ class LeadCenterPlugin
         'New',
         'In Progress',
         'Connect Made',
-        'No Answer',
         'Qualified',
         'No Response',
         'Not Qualified',
@@ -424,29 +423,13 @@ class LeadCenterPlugin
         $from_date = isset($_GET['from_date']) ? sanitize_text_field(wp_unslash($_GET['from_date'])) : '';
         $to_date = isset($_GET['to_date']) ? sanitize_text_field(wp_unslash($_GET['to_date'])) : '';
 
-        $base_csv_url = admin_url('admin-post.php?action=lead_center_export&format=csv');
-        $base_excel_url = admin_url('admin-post.php?action=lead_center_export&format=excel');
-
-        $args = [];
-        if (!empty($selected_status) && in_array($selected_status, $this->lead_statuses, true)) {
-            $args['status'] = $selected_status;
-        }
-        if (!empty($from_date)) {
-            $args['from_date'] = $from_date;
-        }
-        if (!empty($to_date)) {
-            $args['to_date'] = $to_date;
-        }
-
-        $csv_url = add_query_arg($args, $base_csv_url);
-        $excel_url = add_query_arg($args, $base_excel_url);
-
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('Download Leads', 'lead-center'); ?></h1>
             <p><?php esc_html_e('Filter leads by status and date range, then export in CSV or Excel format.', 'lead-center'); ?></p>
-            <form method="get" action="<?php echo esc_url(admin_url('admin.php')); ?>" style="margin-bottom:16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-                <input type="hidden" name="page" value="lead-center-download">
+            <form method="get" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-bottom:16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                <input type="hidden" name="action" value="lead_center_export">
+                <?php wp_nonce_field('lead_center_export'); ?>
                 <div>
                     <label for="lead-center-status"><strong><?php esc_html_e('Lead Status', 'lead-center'); ?></strong></label><br>
                     <select id="lead-center-status" name="status">
@@ -464,11 +447,15 @@ class LeadCenterPlugin
                     <label for="lead-center-to"><strong><?php esc_html_e('To Date', 'lead-center'); ?></strong></label><br>
                     <input type="date" id="lead-center-to" name="to_date" value="<?php echo esc_attr($to_date); ?>">
                 </div>
-                <button class="button" type="submit"><?php esc_html_e('Apply Filter', 'lead-center'); ?></button>
+                <div>
+                    <label for="lead-center-format"><strong><?php esc_html_e('Format', 'lead-center'); ?></strong></label><br>
+                    <select id="lead-center-format" name="format">
+                        <option value="csv"><?php esc_html_e('CSV', 'lead-center'); ?></option>
+                        <option value="excel"><?php esc_html_e('Excel', 'lead-center'); ?></option>
+                    </select>
+                </div>
+                <button class="button button-primary" type="submit"><?php esc_html_e('Apply Filter & Download', 'lead-center'); ?></button>
             </form>
-
-            <a href="<?php echo esc_url(wp_nonce_url($csv_url, 'lead_center_export')); ?>" class="button button-primary"><?php esc_html_e('Download CSV', 'lead-center'); ?></a>
-            <a href="<?php echo esc_url(wp_nonce_url($excel_url, 'lead_center_export')); ?>" class="button"><?php esc_html_e('Download Excel', 'lead-center'); ?></a>
         </div>
         <?php
     }
